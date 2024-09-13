@@ -130,7 +130,6 @@ model_data = {
     'y_std': y_std
 }
 
-# Save the model in a pkl file  
 with open('model.pkl', 'wb') as file:
     pickle.dump(model_data, file)
 
