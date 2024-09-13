@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 import numpy as np
 import pickle
 
@@ -37,13 +37,12 @@ def denormalize(y_pred, y_mean, y_std):
 def home():
     if request.method == 'POST':
         try:
-            # Get input values from the request
-            data = request.get_json()
-            area = float(data['area'])
-            bedrooms = float(data['bedrooms'])
-            bathrooms = float(data['bathrooms'])
-            stories = float(data['stories'])
-            mainroad = 1 if data['mainroad'].lower() == 'yes' else 0
+            # Get input values from the form
+            area = float(request.form['area'])
+            bedrooms = float(request.form['bedrooms'])
+            bathrooms = float(request.form['bathrooms'])
+            stories = float(request.form['stories'])
+            mainroad = 1 if request.form['mainroad'].lower() == 'yes' else 0
             
             # Normalize the input data
             X = np.array([[area, bedrooms, bathrooms, stories, mainroad]])
@@ -53,18 +52,18 @@ def home():
             y_pred = forward_propagation(X)
             y_pred = denormalize(y_pred, y_mean, y_std)
             
-            # Return the prediction as JSON
-            return jsonify({'prediction': f"Predicted Price: {y_pred[0][0]:.2f}"})
+            # Redirect to the predict page with the result
+            return render_template('predict.html', prediction=f"Predicted Price: {y_pred[0][0]:.2f}")
         
         except Exception as e:
-            return jsonify({'error': str(e)}), 400
+            return render_template('index.html', prediction=f"Error: {str(e)}")
     
-    return jsonify({'message': 'Send a POST request with the appropriate data'})
+    return render_template('index.html')
 
 # Route for predictions
 @app.route('/predict', methods=['GET'])
 def predict():
-    return jsonify({'message': 'Use the / route with a POST request to get predictions'})
+    return render_template('predict.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
