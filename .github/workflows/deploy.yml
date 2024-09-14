@@ -38,7 +38,7 @@ jobs:
       - name: Deploy to Staging
         env:
           VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
-        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env stage
+        run: vercel --token $VERCEL_TOKEN  --prod --yes --env stage
 
   deploy_prod:
     needs: deploy_stage
