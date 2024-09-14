@@ -25,7 +25,7 @@ jobs:
       - name: Deploy to Development
         env:
           VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
-        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env dev
+        run: vercel --token $VERCEL_TOKEN --prod --yes --env dev
 
   deploy_stage:
     needs: deploy_dev
