@@ -51,4 +51,4 @@ jobs:
       - name: Deploy to Production
         env:
           VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
-        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env prod
+        run: vercel --token $VERCEL_TOKEN  --prod --yes --env prod
