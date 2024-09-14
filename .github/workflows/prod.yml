@@ -38,4 +38,5 @@ jobs:
         run: |
           # Add any static code analysis tools like bandit for security or pylint for code analysis
           pip install pylint
-          pylint your_project
+          pylint app.py
+
