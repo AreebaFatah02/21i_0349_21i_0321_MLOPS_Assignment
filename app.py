@@ -2,15 +2,19 @@
 Flask application for house price prediction using a simple neural network model.
 """
 
+
 import pickle
 import numpy as np
 from flask import Flask, request, render_template
 
+
 app = Flask(__name__)
+
 
 # Load the model from a pickle file
 with open('model.pkl', 'rb') as file:
     model = pickle.load(file)
+
 
 # Extract model parameters from the loaded data
 W1 = model['W1']
@@ -117,3 +121,4 @@ def predict():
 
 if __name__ == '__main__':
     app.run(debug=True)
+
