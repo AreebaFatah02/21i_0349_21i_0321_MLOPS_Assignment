@@ -22,6 +22,7 @@ x_std = model['X_std']
 y_mean = model['y_mean']
 y_std = model['y_std']
 
+
 def relu(z_value):
     """
     ReLU activation function.
@@ -33,6 +34,7 @@ def relu(z_value):
         numpy.ndarray: The result of applying ReLU element-wise to the input.
     """
     return np.maximum(0, z_value)
+
 
 def forward_propagation(input_x):
     """
@@ -49,6 +51,7 @@ def forward_propagation(input_x):
     z2_value = np.dot(a1_value, W2) + b2
     return z2_value
 
+
 def denormalize(y_pred, mean_value, std_value):
     """
     Denormalize the predictions based on the original mean and standard deviation.
@@ -62,6 +65,7 @@ def denormalize(y_pred, mean_value, std_value):
         numpy.ndarray: The denormalized predictions.
     """
     return (y_pred * std_value) + mean_value
+
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -79,25 +83,26 @@ def home():
             bathrooms = float(request.form['bathrooms'])
             stories = float(request.form['stories'])
             mainroad = 1 if request.form['mainroad'].lower() == 'yes' else 0
-            
+
             # Normalize the input data
             input_x = np.array([[area, bedrooms, bathrooms, stories, mainroad]])
             input_x = (input_x - x_mean) / x_std
-            
+
             # Predict and denormalize the price
             y_pred = forward_propagation(input_x)
             y_pred = denormalize(y_pred, y_mean, y_std)
-            
+
             # Return the prediction result
             return render_template(
                 'predict.html', prediction=f"Predicted Price: {y_pred[0][0]:.2f}"
             )
-        
+
         except ValueError as error:
             # Handle errors and display them on the index page
             return render_template('index.html', prediction=f"Error: {str(error)}")
-    
+
     return render_template('index.html')
+
 
 @app.route('/predict', methods=['GET'])
 def predict():
@@ -108,6 +113,7 @@ def predict():
         str: Rendered HTML template for the prediction page.
     """
     return render_template('predict.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
