@@ -1,6 +1,10 @@
-from flask import Flask, request, render_template
-import numpy as np
+"""
+Flask application for house price prediction using a simple neural network model.
+"""
+
 import pickle
+import numpy as np
+from flask import Flask, request, render_template
 
 app = Flask(__name__)
 
@@ -13,51 +17,51 @@ W1 = model['W1']
 b1 = model['b1']
 W2 = model['W2']
 b2 = model['b2']
-X_mean = model['X_mean']
-X_std = model['X_std']
+x_mean = model['X_mean']
+x_std = model['X_std']
 y_mean = model['y_mean']
 y_std = model['y_std']
 
-def relu(z):
+def relu(z_value):
     """
     ReLU activation function.
 
     Args:
-        z (numpy.ndarray): The input array.
+        z_value (numpy.ndarray): The input array.
 
     Returns:
         numpy.ndarray: The result of applying ReLU element-wise to the input.
     """
-    return np.maximum(0, z)
+    return np.maximum(0, z_value)
 
-def forward_propagation(X):
+def forward_propagation(input_x):
     """
     Perform forward propagation through the neural network.
 
     Args:
-        X (numpy.ndarray): The input feature matrix.
+        input_x (numpy.ndarray): The input feature matrix.
 
     Returns:
         numpy.ndarray: The predicted output.
     """
-    Z1 = np.dot(X, W1) + b1
-    A1 = relu(Z1)
-    Z2 = np.dot(A1, W2) + b2
-    return Z2
+    z1_value = np.dot(input_x, W1) + b1
+    a1_value = relu(z1_value)
+    z2_value = np.dot(a1_value, W2) + b2
+    return z2_value
 
-def denormalize(y_pred, mean, std):
+def denormalize(y_pred, mean_value, std_value):
     """
     Denormalize the predictions based on the original mean and standard deviation.
 
     Args:
         y_pred (numpy.ndarray): The normalized predicted values.
-        mean (float): The original mean value of the target variable.
-        std (float): The original standard deviation of the target variable.
+        mean_value (float): The original mean value of the target variable.
+        std_value (float): The original standard deviation of the target variable.
 
     Returns:
         numpy.ndarray: The denormalized predictions.
     """
-    return (y_pred * std) + mean
+    return (y_pred * std_value) + mean_value
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -77,17 +81,19 @@ def home():
             mainroad = 1 if request.form['mainroad'].lower() == 'yes' else 0
             
             # Normalize the input data
-            X = np.array([[area, bedrooms, bathrooms, stories, mainroad]])
-            X = (X - X_mean) / X_std
+            input_x = np.array([[area, bedrooms, bathrooms, stories, mainroad]])
+            input_x = (input_x - x_mean) / x_std
             
             # Predict and denormalize the price
-            y_pred = forward_propagation(X)
+            y_pred = forward_propagation(input_x)
             y_pred = denormalize(y_pred, y_mean, y_std)
             
             # Return the prediction result
-            return render_template('predict.html', prediction=f"Predicted Price: {y_pred[0][0]:.2f}")
+            return render_template(
+                'predict.html', prediction=f"Predicted Price: {y_pred[0][0]:.2f}"
+            )
         
-        except Exception as error:
+        except ValueError as error:
             # Handle errors and display them on the index page
             return render_template('index.html', prediction=f"Error: {str(error)}")
     
