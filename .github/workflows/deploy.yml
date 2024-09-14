@@ -7,10 +7,9 @@ on:
       - completed
 
 jobs:
-  deploy:
+  deploy_dev:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -23,7 +22,33 @@ jobs:
       - name: Install Vercel CLI
         run: npm install -g vercel
 
-      - name: Deploy to Vercel
+      - name: Deploy to Development
         env:
-                   VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
-        run: vercel --prod --token $VERCEL_TOKEN
+          VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
+        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env dev
+
+  deploy_stage:
+    needs: deploy_dev
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Staging
+        env:
+          VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
+        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env stage
+
+  deploy_prod:
+    needs: deploy_stage
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Deploy to Production
+        env:
+          VERCEL_TOKEN: ${{ secrets.NEWTOKEN }}
+        run: vercel --token $VERCEL_TOKEN --scope your_team --prod --yes --env prod
