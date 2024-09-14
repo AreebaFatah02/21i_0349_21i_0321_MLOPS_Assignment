@@ -61,4 +61,3 @@ def test_predict(client):
     response = client.get('/predict')
     assert b"Prediction Result" in response.data, "Predict page title not rendered correctly."
     assert b"Go Back" in response.data, "Go Back button not rendered correctly."
-
