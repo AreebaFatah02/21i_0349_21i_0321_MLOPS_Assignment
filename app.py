@@ -1,13 +1,14 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template
 import numpy as np
 import pickle
 
 app = Flask(__name__)
 
-# Load the model
+# Load the model from a pickle file
 with open('model.pkl', 'rb') as file:
     model = pickle.load(file)
 
+# Extract model parameters from the loaded data
 W1 = model['W1']
 b1 = model['b1']
 W2 = model['W2']
@@ -17,27 +18,58 @@ X_std = model['X_std']
 y_mean = model['y_mean']
 y_std = model['y_std']
 
-# Activation function (ReLU)
 def relu(z):
+    """
+    ReLU activation function.
+
+    Args:
+        z (numpy.ndarray): The input array.
+
+    Returns:
+        numpy.ndarray: The result of applying ReLU element-wise to the input.
+    """
     return np.maximum(0, z)
 
-# Forward propagation
 def forward_propagation(X):
+    """
+    Perform forward propagation through the neural network.
+
+    Args:
+        X (numpy.ndarray): The input feature matrix.
+
+    Returns:
+        numpy.ndarray: The predicted output.
+    """
     Z1 = np.dot(X, W1) + b1
     A1 = relu(Z1)
     Z2 = np.dot(A1, W2) + b2
     return Z2
 
-# Denormalize the predictions
-def denormalize(y_pred, y_mean, y_std):
-    return (y_pred * y_std) + y_mean
+def denormalize(y_pred, mean, std):
+    """
+    Denormalize the predictions based on the original mean and standard deviation.
 
-# Route for the main page
+    Args:
+        y_pred (numpy.ndarray): The normalized predicted values.
+        mean (float): The original mean value of the target variable.
+        std (float): The original standard deviation of the target variable.
+
+    Returns:
+        numpy.ndarray: The denormalized predictions.
+    """
+    return (y_pred * std) + mean
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    """
+    Handle the home page where users can input data for prediction.
+
+    Returns:
+        str: Rendered HTML template with the prediction result or form.
+    """
     if request.method == 'POST':
         try:
-            # Get input values from the form
+            # Get input values from the form and process them
             area = float(request.form['area'])
             bedrooms = float(request.form['bedrooms'])
             bathrooms = float(request.form['bathrooms'])
@@ -48,21 +80,27 @@ def home():
             X = np.array([[area, bedrooms, bathrooms, stories, mainroad]])
             X = (X - X_mean) / X_std
             
-            # Predict and denormalize
+            # Predict and denormalize the price
             y_pred = forward_propagation(X)
             y_pred = denormalize(y_pred, y_mean, y_std)
             
-            # Redirect to the predict page with the result
+            # Return the prediction result
             return render_template('predict.html', prediction=f"Predicted Price: {y_pred[0][0]:.2f}")
         
-        except Exception as e:
-            return render_template('index.html', prediction=f"Error: {str(e)}")
+        except Exception as error:
+            # Handle errors and display them on the index page
+            return render_template('index.html', prediction=f"Error: {str(error)}")
     
     return render_template('index.html')
 
-# Route for predictions
 @app.route('/predict', methods=['GET'])
 def predict():
+    """
+    Render the prediction result page.
+
+    Returns:
+        str: Rendered HTML template for the prediction page.
+    """
     return render_template('predict.html')
 
 if __name__ == '__main__':
