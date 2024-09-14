@@ -4,9 +4,13 @@ on:
   push:
     branches:
       - main
+      - stage
+      - prod
   pull_request:
     branches:
       - main
+      - stage
+      - prod
 
 jobs:
   build:
@@ -26,7 +30,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run Build
+      - name: Lint the code
         run: |
-          # Add build steps here if any (e.g., compiling assets, generating static files)
-          echo "Build complete"
+          # Install flake8 or any linter of your choice
+          pip install flake8
+          flake8 --max-line-length=120
+
+      - name: Build process
+        run: |
+          # Add additional build steps here if needed
+          echo "Build process completed"
